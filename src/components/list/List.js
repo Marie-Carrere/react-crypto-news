@@ -1,6 +1,7 @@
 import React from 'react';
 import { handleResponse } from '../../helpers';
 import { API_URL } from '../../config';
+import Loading from '../common/Loading';
 import './Table.css';
 
 class List extends React.Component {
@@ -33,9 +34,19 @@ class List extends React.Component {
         });
     }
 
+    renderChangePercent(percent) {
+        if(percent > 0) {
+            return <span className="percent-raised">{percent}% &uarr;</span>
+        } else if(percent < 0) {
+            return <span className="percent-fallen">{percent}% &uarr;</span>
+        } else {
+            return <span>{percent}% &uarr;</span>
+        }
+    }
+
     render() {
         if(this.state.loading) {
-            return <div>Loading...</div>
+            return <div className="loading-container"><Loading /></div>
             
         }
         return  (
@@ -63,13 +74,15 @@ class List extends React.Component {
                                 <td>
                                     <span className="Table-dollar">$ {currency.marketCap}</span>
                                 </td>
+                                <td>
+                                    {this.renderChangePercent(currency.percentChange24h)}
+                                </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
         );
-        
     }
 }
 
