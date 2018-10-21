@@ -1,5 +1,6 @@
 import React from 'react';
 import './Table.css';
+import PropTypes from 'prop-types';
 
 const Table = (props) => {
     const { currencies, renderChangePercent } = props;
@@ -41,5 +42,10 @@ const Table = (props) => {
             </div>  
             );
 }
+
+Table.propTypes = {
+    currencies: PropTypes.array.isRequired,
+    renderChangePercent: PropTypes.func.isRequired,
+};
 
 export default Table;
