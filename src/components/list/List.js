@@ -3,6 +3,7 @@ import { handleResponse } from '../../helpers';
 import { API_URL } from '../../config';
 import Loading from '../common/Loading';
 import Table from './Table';
+import Pagination from './Pagination';
 
 
 class List extends React.Component {
@@ -13,17 +14,31 @@ class List extends React.Component {
             loading: false,
             currencies: [],
             error: null,
+            totalPages: 0,
+            page: 1,
         };
+
+        this.handlePaginationClick = this.handlePaginationClick.bind(this);
     }
 
     componentDidMount() {
+        this.fetchCurrencies();
+    }
+
+
+    fetchCurrencies() {
         this.setState({ loading: true });
 
-        fetch(`${API_URL}/cryptocurrencies?page=1&perPage=20`)
+        const { page } = this.state;
+
+        fetch(`${API_URL}/cryptocurrencies?page=${page}&perPage=20`)
             .then(handleResponse)
             .then((data) => {
+                const { currencies, totalPages } = data;
+
                 this.setState({ 
-                    currencies: data.currencies, 
+                    currencies: currencies, 
+                    totalPages: totalPages,
                     loading: false 
                 });
             })
@@ -39,14 +54,28 @@ class List extends React.Component {
         if(percent > 0) {
             return <span className="percent-raised">{percent}% &uarr;</span>
         } else if(percent < 0) {
-            return <span className="percent-fallen">{percent}% &uarr;</span>
+            return <span className="percent-fallen">{percent}% &darr;</span>
         } else {
             return <span>{percent}% &uarr;</span>
         }
     }
 
+    handlePaginationClick(direction) {
+        let nextPage = this.state.page;
+
+        // Increment or decrement nextPage if direction variable goes up or down
+        nextPage = direction === 'next' ? nextPage + 1 : nextPage - 1;
+
+        this.setState({ page: nextPage }, () => {
+            //to make sure the first page is updated
+            this.fetchCurrencies();
+        });
+    }
+
+
+
     render() {
-        const { loading, error, currencies } = this.state;
+        const { loading, error, currencies, page, totalPages } = this.state;
 
         // render loading component if loading state is set to true
         if(loading) {
@@ -58,12 +87,19 @@ class List extends React.Component {
             return <div className="error">{error}</div>
         }
 
+        return(
+            <div> 
+                <Table 
+                currencies={currencies} 
+                renderChangePercent={this.renderChangePercent}
+                /> 
 
-        return  (
-            <Table 
-            currencies={currencies} 
-            renderChangePercent={this.renderChangePercent}
-            /> 
+                <Pagination
+                    page={page}
+                    totalPages={totalPages}
+                    handlePaginationClick={this.handlePaginationClick}
+                 />
+            </div> 
         );
     }
 }
